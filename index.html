@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Igreja Livre Para Sempre — App de Gestão</title>
+  <!-- Favicon: cruz azul -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230046d1'/%3E%3Cpath d='M29 8h6v18h18v6H35v24h-6V32H11v-6h18z' fill='white'/%3E%3C/svg%3E" />
+  <style>
+    :root{
+      --azul-800:#0a2a6b; --azul-700:#0f3c96; --azul-600:#0f49c4; --azul-500:#1857ff;
+      --azul-100:#eaf0ff; --azul-050:#f5f8ff; --branco:#fff; --cinza-700:#2c3e50;
+      --ok:#16a34a; --warn:#f59e0b; --danger:#dc2626;
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,var(--azul-050),var(--branco));color:var(--cinza-700);font-size:18px;}
+    header.hero{padding:28px 16px;background:linear-gradient(135deg,var(--azul-800),var(--azul-600));color:var(--branco);position:sticky;top:0;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.12)}
+    .brand{display:flex;align-items:center;gap:14px;max-width:1200px;margin:0 auto}
+    .logo{width:58px;height:58px;border-radius:16px;background:var(--azul-500);display:grid;place-items:center;box-shadow:inset 0 0 0 2px rgba(255,255,255,.2)}
+    .logo svg{width:36px;height:36px;fill:#fff}
+    h1{margin:0;font-size:clamp(22px,3.2vw,32px);letter-spacing:.2px}
+    .verse{opacity:.95;margin-top:6px;font-size:clamp(14px,2.2vw,18px)}
+
+    /* Nav */
+    nav.tabs{max-width:1200px;margin:12px auto 0;display:flex;flex-wrap:wrap;gap:8px}
+    .tab-btn{appearance:none;border:0;padding:10px 14px;border-radius:999px;background:#ffffff1a;color:#fff;backdrop-filter:blur(6px);cursor:pointer;font-weight:600}
+    .tab-btn.active{background:#fff;color:var(--azul-800)}
+
+    /* Layout */
+    main{max-width:1200px;margin:16px auto;padding:12px}
+    .card{background:#fff;border-radius:var(--radius);box-shadow:0 10px 30px rgba(10,42,107,.08);padding:18px}
+    .grid{display:grid;gap:14px}
+    .grid.cols-3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+    .muted{color:#566}
+
+    /* Inputs */
+    label{font-weight:600;margin-top:8px;display:block}
+    input,select,textarea{width:100%;padding:12px 14px;border:1px solid #e6e9f5;border-radius:12px;background:var(--azul-050)}
+    input:focus,select:focus,textarea:focus{outline:3px solid #dfe8ff;border-color:#c7d6ff}
+    .row{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+    .col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}.col-12{grid-column:span 12}
+    @media(max-width:720px){.col-6,.col-4,.col-3{grid-column:span 12}}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;border:0;cursor:pointer;font-weight:700}
+    .primary{background:var(--azul-600);color:#fff;box-shadow:0 8px 20px rgba(15,73,196,.25)}
+    .ghost{background:#eef3ff;color:var(--azul-700)}
+    .danger{background:var(--danger);color:#fff}
+
+    /* Tables */
+    table{width:100%;border-collapse:collapse}
+    thead th{position:sticky;top:0;background:#f2f6ff;text-align:left;padding:10px;border-bottom:2px solid #e8eeff}
+    tbody td{padding:10px;border-bottom:1px solid #eef2ff}
+    .actions button{margin-right:8px}
+
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#eef3ff;color:var(--azul-700);font-weight:700}
+
+    /* Section titles */
+    .title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+
+    /* Footer */
+    footer{margin:40px auto;max-width:1200px;padding:14px;color:#567;text-align:center}
+    footer .links a{color:var(--azul-700);font-weight:700;text-decoration:none}
+
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M29 8h6v18h18v6H35v24h-6V32H11v-6h18z"/></svg>
+      </div>
+      <div>
+        <h1>Igreja Livre Para Sempre</h1>
+        <div class="verse"><em>“Se o Filho vos libertar, sereis verdadeiramente livres” — João 8:36</em></div>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab-btn active" data-tab="dashboard">Painel</button>
+      <button class="tab-btn" data-tab="membros">Membros</button>
+      <button class="tab-btn" data-tab="ofertas">Ofertas & Dízimos</button>
+      <button class="tab-btn" data-tab="servos">Servos & Ministros</button>
+      <button class="tab-btn" data-tab="cultos">Horários de Cultos</button>
+      <button class="tab-btn" data-tab="pregador">Pregador & Temas</button>
+      <button class="tab-btn" data-tab="testemunhos">Testemunhos</button>
+      <button class="tab-btn" data-tab="verso">Versículo do Dia</button>
+      <button class="tab-btn" data-tab="lider">Líder</button>
+      <button class="tab-btn" data-tab="galeria">Galeria</button>
+      <button class="tab-btn" data-tab="config">Configurações</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- DASHBOARD -->
+    <section id="tab-dashboard" class="grid cols-3">
+      <div class="card">
+        <div class="title"><h3>Membros</h3><span class="badge" id="kpiMembros">0</span></div>
+        <p class="muted">Total de membros cadastrados.</p>
+      </div>
+      <div class="card">
+        <div class="title"><h3>Contribuições (mês)</h3><span class="badge" id="kpiMes">Kz 0</span></div>
+        <p class="muted">Soma de ofertas + dízimos do mês atual.</p>
+      </div>
+      <div class="card">
+        <div class="title"><h3>Cultos</h3><span class="badge" id="kpiCultos">0</span></div>
+        <p class="muted">Quantidade de horários cadastrados.</p>
+      </div>
+    </section>
+
+    <!-- MEMBROS -->
+    <section id="tab-membros" class="card hidden">
+      <div class="title"><h2>Membros</h2>
+        <div>
+          <button class="btn ghost" id="exportMembros">Exportar</button>
+          <label class="btn ghost" for="importMembrosInput" style="cursor:pointer">Importar</label>
+          <input id="importMembrosInput" type="file" accept="application/json" class="hidden" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          <label>Nome completo</label><input id="m-nome" placeholder="Nome do membro" />
+        </div>
+        <div class="col-3">
+          <label>Sexo</label>
+          <select id="m-sexo"><option>Masculino</option><option>Feminino</option></select>
+        </div>
+        <div class="col-3">
+          <label>Telefone</label><input id="m-fone" placeholder="ex: 932 000 000" />
+        </div>
+        <div class="col-6">
+          <label>Endereço</label><input id="m-end" placeholder="Bairro, Rua" />
+        </div>
+        <div class="col-6">
+          <label>Função</label><input id="m-func" placeholder="ex: Diácono, Coral, Intercessor" />
+        </div>
+        <div class="col-12"><button class="btn primary" id="addMembro">Adicionar membro</button></div>
+      </div>
+      <div style="margin-top:14px" class="row">
+        <div class="col-6"><input id="m-busca" placeholder="Buscar membro..."/></div>
+      </div>
+      <div style="overflow:auto;margin-top:10px">
+        <table id="tblMembros"><thead><tr>
+          <th>Nome</th><th>Sexo</th><th>Telefone</th><th>Endereço</th><th>Função</th><th>Ações</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <!-- OFERTAS & DÍZIMOS -->
+    <section id="tab-ofertas" class="card hidden">
+      <div class="title"><h2>Ofertas & Dízimos</h2>
+        <div>
+          <button class="btn ghost" id="exportOfertas">Exportar</button>
+          <label class="btn ghost" for="importOfertasInput" style="cursor:pointer">Importar</label>
+          <input id="importOfertasInput" type="file" accept="application/json" class="hidden" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6"><label>Contribuinte</label><input id="o-nome" placeholder="Nome do membro"/></div>
+        <div class="col-3"><label>Tipo</label>
+          <select id="o-tipo"><option value="oferta">Oferta</option><option value="dizimo">Dízimo</option></select>
+        </div>
+        <div class="col-3"><label>Valor (Kz)</label><input id="o-valor" type="number" min="0" step="100" placeholder="0"/></div>
+        <div class="col-6"><label>Data</label><input id="o-data" type="date"/></div>
+        <div class="col-6"><label>Observação</label><input id="o-obs" placeholder="Ex: culto de domingo"/></div>
+        <div class="col-12"><button class="btn primary" id="addOferta">Registrar</button></div>
+      </div>
+      <div class="grid cols-3" style="margin-top:14px">
+        <div class="card"><div class="title"><h3>Total (mês)</h3><span class="badge" id="totMes">Kz 0</span></div></div>
+        <div class="card"><div class="title"><h3>Ofertas (mês)</h3><span class="badge" id="totOfertasMes">Kz 0</span></div></div>
+        <div class="card"><div class="title"><h3>Dízimos (mês)</h3><span class="badge" id="totDizimosMes">Kz 0</span></div></div>
+      </div>
+      <div style="overflow:auto;margin-top:10px">
+        <table id="tblOfertas"><thead><tr>
+          <th>Data</th><th>Nome</th><th>Tipo</th><th>Valor (Kz)</th><th>Obs</th><th>Ações</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <!-- SERVOS & MINISTROS -->
+    <section id="tab-servos" class="card hidden">
+      <div class="title"><h2>Servos & Ministros</h2></div>
+      <div class="row">
+        <div class="col-6"><label>Nome</label><input id="s-nome" placeholder="Nome"/></div>
+        <div class="col-3"><label>Cargo</label><input id="s-cargo" placeholder="Ex: Ministro, Diácono"/></div>
+        <div class="col-3"><label>Contato</label><input id="s-fone" placeholder="Telefone"/></div>
+        <div class="col-12"><button class="btn primary" id="addServo">Adicionar</button></div>
+      </div>
+      <div style="overflow:auto;margin-top:10px">
+        <table id="tblServos"><thead><tr>
+          <th>Ícone</th><th>Nome</th><th>Cargo</th><th>Contato</th><th>Ações</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+      <template id="tplCruz">
+        <svg width="22" height="22" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path fill="#0f49c4" d="M29 8h6v18h18v6H35v24h-6V32H11v-6h18z"/></svg>
+      </template>
+    </section>
+
+    <!-- CULTOS -->
+    <section id="tab-cultos" class="card hidden">
+      <div class="title"><h2>Horários de Cultos</h2></div>
+      <div class="row">
+        <div class="col-4"><label>Dia</label>
+          <select id="c-dia">
+            <option>Domingo</option><option>Segunda</option><option>Terça</option><option>Quarta</option>
+            <option>Quinta</option><option>Sexta</option><option>Sábado</option>
+          </select>
+        </div>
+        <div class="col-4"><label>Início</label><input id="c-ini" type="time"/></div>
+        <div class="col-4"><label>Fim</label><input id="c-fim" type="time"/></div>
+        <div class="col-12"><button class="btn primary" id="addCulto">Adicionar horário</button></div>
+      </div>
+      <div class="muted" style="margin-top:6px">Padrão da igreja: Domingo 09:30–12:00 • Terça 16:00–18:00 • Sexta 16:00–18:00</div>
+      <div style="overflow:auto;margin-top:10px">
+        <table id="tblCultos"><thead><tr>
+          <th>Dia</th><th>Início</th><th>Fim</th><th>Ações</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <!-- PREGADOR & TEMAS -->
+    <section id="tab-pregador" class="card hidden">
+      <div class="title"><h2>Pregador & Temas ministrados</h2></div>
+      <div class="row">
+        <div class="col-6"><label>Tema</label><input id="p-tema" placeholder="Tema ministrado"/></div>
+        <div class="col-3"><label>Pregador</label><input id="p-nome" placeholder="Nome do pregador"/></div>
+        <div class="col-3"><label>Data</label><input id="p-data" type="date"/></div>
+        <div class="col-12"><button class="btn primary" id="addTema">Adicionar tema</button></div>
+      </div>
+      <div style="overflow:auto;margin-top:10px">
+        <table id="tblTemas"><thead><tr>
+          <th>Data</th><th>Tema</th><th>Pregador</th><th>Ações</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <!-- TESTEMUNHOS -->
+    <section id="tab-testemunhos" class="card hidden">
+      <div class="title"><h2>Testemunhos</h2></div>
+      <div class="row">
+        <div class="col-6"><label>Nome</label><input id="t-nome" placeholder="Quem testemunha"/></div>
+        <div class="col-6"><label>Título</label><input id="t-titulo" placeholder="Título do testemunho"/></div>
+        <div class="col-12"><label>Relato</label><textarea id="t-relato" rows="4" placeholder="Conte o que Deus fez..."></textarea></div>
+        <div class="col-12"><button class="btn primary" id="addTestemunho">Adicionar testemunho</button></div>
+      </div>
+      <div id="listaTestemunhos" class="grid" style="margin-top:12px"></div>
+    </section>
+
+    <!-- VERSÍCULO DO DIA -->
+    <section id="tab-verso" class="card hidden">
+      <div class="title"><h2>Versículo do dia</h2><button class="btn ghost" id="trocarVerso">Trocar</button></div>
+      <blockquote id="versoTexto" style="font-size:22px;line-height:1.5;margin:8px 0"></blockquote>
+      <div class="muted">Gera um versículo localmente, sem internet.</div>
+    </section>
+
+    <!-- LÍDER -->
+    <section id="tab-lider" class="card hidden">
+      <div class="title"><h2>Líder da Igreja</h2></div>
+      <div class="grid cols-3">
+        <div class="card" style="grid-column:span 1">
+          <div style="width:100%;aspect-ratio:1/1;border-radius:16px;background:linear-gradient(135deg,#dfe8ff,#fff) url('') center/cover"></div>
+        </div>
+        <div class="card" style="grid-column:span 2">
+          <h3>Ricardo Alberto Balunga</h3>
+          <p><strong>Nacionalidade:</strong> Angolano</p>
+          <p><strong>Resumo:</strong> Servo do Altíssimo, chamado para o ministério profético. Comprometido com a pregação do Evangelho, discipulado e serviço à comunidade.</p>
+          <p><strong>Contacto:</strong> <a href="https://wa.me/932469625" target="_blank">WhatsApp 932 469 625</a> · <a href="https://www.facebook.com/profile.php?id=61557266034012&mibextid=ZbWKwL" target="_blank">Facebook</a></p>
+          <p><strong>Sede:</strong> Lunda Norte, Angola</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- GALERIA -->
+    <section id="tab-galeria" class="card hidden">
+      <div class="title"><h2>Galeria</h2><button class="btn ghost" id="addFoto">Adicionar foto</button></div>
+      <input id="galeriaInput" class="hidden" type="file" accept="image/*" multiple>
+      <div id="gridGaleria" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px"></div>
+    </section>
+
+    <!-- CONFIG -->
+    <section id="tab-config" class="card hidden">
+      <div class="title"><h2>Configurações & Backup</h2></div>
+      <div class="grid cols-3">
+        <div class="card">
+          <h3>Backup de todos os dados</h3>
+          <button class="btn primary" id="exportTudo">Exportar JSON</button>
+          <label class="btn ghost" for="importTudoInput" style="margin-left:8px;cursor:pointer">Importar JSON</label>
+          <input id="importTudoInput" type="file" accept="application/json" class="hidden" />
+        </div>
+        <div class="card">
+          <h3>Contato & Redes</h3>
+          <p><a href="https://wa.me/932469625" target="_blank" class="badge">WhatsApp 932 469 625</a></p>
+          <p><a href="https://www.facebook.com/profile.php?id=61557266034012&mibextid=ZbWKwL" target="_blank" class="badge">Facebook oficial</a></p>
+        </div>
+        <div class="card">
+          <h3>Sobre</h3>
+          <p>Aplicativo local (dados no seu navegador via LocalStorage). Pode publicar no GitHub Pages ou Vercel sem servidor.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="links">&copy; <span id="ano"></span> Igreja Livre Para Sempre — Lunda Norte, Angola · <a href="https://wa.me/932469625" target="_blank">WhatsApp</a> · <a href="https://www.facebook.com/profile.php?id=61557266034012&mibextid=ZbWKwL" target="_blank">Facebook</a></div>
+  </footer>
+
+  <script>
+    // ---------- Util ----------
+    const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
+    const fmtKz = v => `Kz ${Number(v||0).toLocaleString('pt-PT')}`;
+    const store = {
+      get:(k,def)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(def))}catch(e){return def}},
+      set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))
+    };
+
+    // ---------- Tabs ----------
+    const tabs = $$('#tabs .tab-btn');
+    function showTab(id){
+      tabs.forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+      document.querySelectorAll('main > section').forEach(s=>{
+        s.classList.toggle('hidden', s.id!==`tab-${id}`);
+      })
+    }
+    tabs.forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+
+    // ---------- Estado ----------
+    let membros = store.get('membros',[]);
+    let ofertas = store.get('ofertas',[]);
+    let servos = store.get('servos',[]);
+    let cultos = store.get('cultos',[
+      {dia:'Domingo',ini:'09:30',fim:'12:00'},
+      {dia:'Terça',ini:'16:00',fim:'18:00'},
+      {dia:'Sexta',ini:'16:00',fim:'18:00'},
+    ]);
+    let temas = store.get('temas',[]);
+    let testemunhos = store.get('testemunhos',[]);
+    let galeria = store.get('galeria',[]); // base64 images
+
+    // ---------- Renderizadores ----------
+    function renderKPIs(){
+      $('#kpiMembros').textContent = membros.length;
+      const now = new Date();
+      const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+      const doMes = ofertas.filter(o=> (o.data||'').startsWith(ym));
+      const soma = (arr,cond)=>arr.filter(cond).reduce((a,b)=>a+Number(b.valor||0),0);
+      const totMes= soma(doMes, _=>true);
+      const totO= soma(doMes, o=>o.tipo==='oferta');
+      const totD= soma(doMes, o=>o.tipo==='dizimo');
+      $('#kpiMes').textContent = fmtKz(totMes);
+      $('#totMes').textContent = fmtKz(totMes);
+      $('#totOfertasMes').textContent = fmtKz(totO);
+      $('#totDizimosMes').textContent = fmtKz(totD);
+      $('#kpiCultos').textContent = cultos.length;
+    }
+
+    function renderMembros(){
+      const term = ($('#m-busca').value||'').toLowerCase();
+      const tbody = $('#tblMembros tbody'); tbody.innerHTML='';
+      membros.filter(m=>Object.values(m).join(' ').toLowerCase().includes(term)).forEach((m,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${m.nome||''}</td><td>${m.sexo||''}</td><td>${m.fone||''}</td><td>${m.end||''}</td><td>${m.func||''}</td>
+          <td class='actions'>
+            <button class='btn ghost' data-edit='${i}'>Editar</button>
+            <button class='btn danger' data-del='${i}'>Excluir</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{membros.splice(+b.dataset.del,1); store.set('membros',membros); renderMembros(); renderKPIs();});
+      tbody.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{
+        const m=membros[+b.dataset.edit];
+        $('#m-nome').value=m.nome; $('#m-sexo').value=m.sexo; $('#m-fone').value=m.fone; $('#m-end').value=m.end; $('#m-func').value=m.func;
+        membros.splice(+b.dataset.edit,1); store.set('membros',membros); renderMembros(); renderKPIs();
+      });
+    }
+
+    function renderOfertas(){
+      const tbody = $('#tblOfertas tbody'); tbody.innerHTML='';
+      ofertas.forEach((o,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${o.data||''}</td><td>${o.nome||''}</td><td>${o.tipo}</td><td>${fmtKz(o.valor)}</td><td>${o.obs||''}</td>
+          <td class='actions'><button class='btn ghost' data-edit='${i}'>Editar</button><button class='btn danger' data-del='${i}'>Excluir</button></td>`;
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ofertas.splice(+b.dataset.del,1); store.set('ofertas',ofertas); renderOfertas(); renderKPIs();});
+      tbody.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{
+        const o=ofertas[+b.dataset.edit];
+        $('#o-nome').value=o.nome; $('#o-tipo').value=o.tipo; $('#o-valor').value=o.valor; $('#o-data').value=o.data; $('#o-obs').value=o.obs;
+        ofertas.splice(+b.dataset.edit,1); store.set('ofertas',ofertas); renderOfertas(); renderKPIs();
+      });
+    }
+
+    function renderServos(){
+      const tbody = $('#tblServos tbody'); tbody.innerHTML='';
+      servos.forEach((s,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${$('#tplCruz').innerHTML}</td><td>${s.nome||''}</td><td>${s.cargo||''}</td><td>${s.fone||''}</td>
+          <td class='actions'><button class='btn ghost' data-edit='${i}'>Editar</button><button class='btn danger' data-del='${i}'>Excluir</button></td>`;
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{servos.splice(+b.dataset.del,1); store.set('servos',servos); renderServos();});
+      tbody.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{
+        const s=servos[+b.dataset.edit];
+        $('#s-nome').value=s.nome; $('#s-cargo').value=s.cargo; $('#s-fone').value=s.fone;
+        servos.splice(+b.dataset.edit,1); store.set('servos',servos); renderServos();
+      });
+    }
+
+    function renderCultos(){
+      const tbody = $('#tblCultos tbody'); tbody.innerHTML='';
+      cultos.forEach((c,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${c.dia}</td><td>${c.ini}</td><td>${c.fim}</td>
+          <td class='actions'><button class='btn ghost' data-edit='${i}'>Editar</button><button class='btn danger' data-del='${i}'>Excluir</button></td>`;
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{cultos.splice(+b.dataset.del,1); store.set('cultos',cultos); renderCultos(); renderKPIs();});
+      tbody.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{
+        const c=cultos[+b.dataset.edit];
+        $('#c-dia').value=c.dia; $('#c-ini').value=c.ini; $('#c-fim').value=c.fim;
+        cultos.splice(+b.dataset.edit,1); store.set('cultos',cultos); renderCultos(); renderKPIs();
+      });
+    }
+
+    function renderTemas(){
+      const tbody = $('#tblTemas tbody'); tbody.innerHTML='';
+      temas.forEach((p,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${p.data||''}</td><td>${p.tema||''}</td><td>${p.pregador||''}</td>
+          <td class='actions'><button class='btn ghost' data-edit='${i}'>Editar</button><button class='btn danger' data-del='${i}'>Excluir</button></td>`;
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{temas.splice(+b.dataset.del,1); store.set('temas',temas); renderTemas();});
+      tbody.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{
+        const p=temas[+b.dataset.edit];
+        $('#p-tema').value=p.tema; $('#p-nome').value=p.pregador; $('#p-data').value=p.data;
+        temas.splice(+b.dataset.edit,1); store.set('temas',temas); renderTemas();
+      });
+    }
+
+    function renderTestemunhos(){
+      const box = $('#listaTestemunhos'); box.innerHTML='';
+      testemunhos.forEach((t,i)=>{
+        const card=document.createElement('div');
+        card.className='card';
+        card.innerHTML=`<div class='title'><h3>${t.titulo||'Testemunho'}</h3>
+          <div><button class='btn ghost' data-edit='${i}'>Editar</button> <button class='btn danger' data-del='${i}'>Excluir</button></div></div>
+          <p class='muted'>por ${t.nome||'Anônimo'}</p><p>${t.relato||''}</p>`;
+        box.appendChild(card);
+      });
+      box.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{testemunhos.splice(+b.dataset.del,1); store.set('testemunhos',testemunhos); renderTestemunhos();});
+      box.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{
+        const t=testemunhos[+b.dataset.edit];
+        $('#t-nome').value=t.nome; $('#t-titulo').value=t.titulo; $('#t-relato').value=t.relato;
+        testemunhos.splice(+b.dataset.edit,1); store.set('testemunhos',testemunhos); renderTestemunhos();
+      });
+    }
+
+    function renderGaleria(){
+      const grid = $('#gridGaleria'); grid.innerHTML='';
+      galeria.forEach((src,i)=>{
+        const d=document.createElement('div'); d.className='card'; d.style.padding='8px';
+        d.innerHTML=`<img src='${src}' style='width:100%;border-radius:12px;display:block'>
+          <div class='actions' style='margin-top:8px'><button class='btn danger' data-del='${i}'>Excluir</button></div>`;
+        grid.appendChild(d);
+      });
+      grid.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{galeria.splice(+b.dataset.del,1); store.set('galeria',galeria); renderGaleria();});
+    }
+
+    // ---------- Ações (CRUD) ----------
+    $('#addMembro').onclick=()=>{
+      const m={nome:$('#m-nome').value.trim(),sexo:$('#m-sexo').value,fone:$('#m-fone').value,end:$('#m-end').value,func:$('#m-func').value};
+      if(!m.nome){alert('Informe o nome.');return}
+      membros.push(m); store.set('membros',membros); $('#m-nome').value=$('#m-fone').value=$('#m-end').value=$('#m-func').value=''; renderMembros(); renderKPIs();
+    };
+    $('#m-busca').oninput=renderMembros;
+    $('#exportMembros').onclick=()=>downloadJSON('membros.json',membros);
+    $('#importMembrosInput').onchange=e=>importJSON(e,arr=>{membros=arr;store.set('membros',membros);renderMembros();renderKPIs();});
+
+    $('#addOferta').onclick=()=>{
+      const o={nome:$('#o-nome').value.trim(),tipo:$('#o-tipo').value,valor:Number($('#o-valor').value||0),data:$('#o-data').value,obs:$('#o-obs').value};
+      if(!o.data){o.data=new Date().toISOString().slice(0,10)}
+      ofertas.push(o); store.set('ofertas',ofertas); $('#o-nome').value=$('#o-valor').value=$('#o-obs').value=''; renderOfertas(); renderKPIs();
+    };
+    $('#exportOfertas').onclick=()=>downloadJSON('ofertas.json',ofertas);
+    $('#importOfertasInput').onchange=e=>importJSON(e,arr=>{ofertas=arr;store.set('ofertas',ofertas);renderOfertas();renderKPIs();});
+
+    $('#addServo').onclick=()=>{
+      const s={nome:$('#s-nome').value.trim(),cargo:$('#s-cargo').value,fone:$('#s-fone').value};
+      if(!s.nome){alert('Informe o nome.');return}
+      servos.push(s); store.set('servos',servos); $('#s-nome').value=$('#s-cargo').value=$('#s-fone').value=''; renderServos();
+    };
+
+    $('#addCulto').onclick=()=>{
+      const c={dia:$('#c-dia').value,ini:$('#c-ini').value,fim:$('#c-fim').value};
+      if(!c.ini||!c.fim){alert('Informe início e fim.');return}
+      cultos.push(c); store.set('cultos',cultos); $('#c-ini').value=$('#c-fim').value=''; renderCultos(); renderKPIs();
+    };
+
+    $('#addTema').onclick=()=>{
+      const p={tema:$('#p-tema').value.trim(),pregador:$('#p-nome').value,data:$('#p-data').value};
+      if(!p.tema){alert('Informe o tema.');return}
+      if(!p.data){p.data=new Date().toISOString().slice(0,10)}
+      temas.push(p); store.set('temas',temas); $('#p-tema').value=$('#p-nome').value=''; renderTemas();
+    };
+
+    $('#addTestemunho').onclick=()=>{
+      const t={nome:$('#t-nome').value.trim(),titulo:$('#t-titulo').value.trim(),relato:$('#t-relato').value.trim()};
+      if(!t.titulo||!t.relato){alert('Preencha título e relato.');return}
+      testemunhos.push(t); store.set('testemunhos',testemunhos); $('#t-nome').value=$('#t-titulo').value=$('#t-relato').value=''; renderTestemunhos();
+    };
+
+    $('#addFoto').onclick=()=>$('#galeriaInput').click();
+    $('#galeriaInput').onchange=async e=>{
+      const files=[...e.target.files];
+      for(const f of files){
+        const b64=await toBase64(f); galeria.push(b64);
+      }
+      store.set('galeria',galeria); renderGaleria(); e.target.value='';
+    }
+
+    // ---------- Versículo do Dia ----------
+    const versos=[
+      'O Senhor é o meu pastor; nada me faltará. — Salmo 23:1',
+      'Tudo posso naquele que me fortalece. — Filipenses 4:13',
+      'Porque Deus amou o mundo de tal maneira... — João 3:16',
+      'Entrega o teu caminho ao Senhor; confia nele, e ele o fará. — Salmo 37:5',
+      'Clama a mim, e responder-te-ei. — Jeremias 33:3',
+      'Sede fortes e corajosos... porque o Senhor vai contigo. — Deuteronômio 31:6',
+      'Buscai primeiro o Reino de Deus... — Mateus 6:33',
+      'A alegria do Senhor é a vossa força. — Neemias 8:10',
+      'Pedi, e dar-se-vos-á; buscai, e achareis. — Mateus 7:7',
+      'O Senhor é a minha luz e a minha salvação. — Salmo 27:1'
+    ];
+    function versoIndex(d=new Date()){
+      const n = Math.floor(d.getTime()/(1000*60*60*24));
+      return n % versos.length;
+    }
+    function renderVerso(){ $('#versoTexto').textContent = versos[versoIndex()]; }
+    $('#trocarVerso').onclick=()=>{
+      // Embaralha para um novo
+      const i = Math.floor(Math.random()*versos.length); $('#versoTexto').textContent = versos[i];
+    }
+
+    // ---------- Backup completo ----------
+    $('#exportTudo').onclick=()=>{
+      const dump={membros,ofertas,servos,cultos,temas,testemunhos,galeria};
+      downloadJSON('igreja_backup.json',dump);
+    };
+    $('#importTudoInput').onchange=e=>importJSON(e,obj=>{
+      ({membros,ofertas,servos,cultos,temas,testemunhos,galeria}=obj);
+      store.set('membros',membros); store.set('ofertas',ofertas); store.set('servos',servos); store.set('cultos',cultos); store.set('temas',temas); store.set('testemunhos',testemunhos); store.set('galeria',galeria);
+      renderAll();
+    });
+
+    // ---------- Helpers ----------
+    function downloadJSON(filename,data){
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);
+    }
+    function importJSON(e,cb){
+      const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ cb(JSON.parse(reader.result)); }catch(err){ alert('JSON inválido.'); } }; reader.readAsText(file);
+      e.target.value='';
+    }
+    function toBase64(file){
+      return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
+    }
+
+    function renderAll(){
+      renderKPIs(); renderMembros(); renderOfertas(); renderServos(); renderCultos(); renderTemas(); renderTestemunhos(); renderGaleria(); renderVerso();
+    }
+
+    // Init
+    $('#ano').textContent=new Date().getFullYear();
+    showTab('dashboard');
+    renderAll();
+  </script>
+</body>
+</html>
